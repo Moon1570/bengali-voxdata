@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Add POI{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Add a Person of Interest</h1></div>
+
+<form class="card-form" method="post" enctype="multipart/form-data"
+      action="{{ url_for('new_poi') }}">
+  {% set f = form or {} %}
+  <label>Name <span class="req">*</span>
+    <input type="text" name="name" required value="{{ f.get('name', '') }}"
+           placeholder="e.g. Ferdous Ahmed / ফেরদৌস আহমেদ">
+  </label>
+
+  <div class="row">
+    <label>Region
+      <input type="text" name="region" value="{{ f.get('region', '') }}"
+             placeholder="Bangladesh / India">
+    </label>
+    <label>Profession
+      <input type="text" name="profession" value="{{ f.get('profession', '') }}"
+             placeholder="actor, politician, news_anchor…">
+    </label>
+  </div>
+
+  <div class="row">
+    <label>Gender
+      <input type="text" name="gender" value="{{ f.get('gender', '') }}"
+             placeholder="male / female / other">
+    </label>
+    <label>Wikidata ID
+      <input type="text" name="wikidata_id" value="{{ f.get('wikidata_id', '') }}"
+             placeholder="Q12345">
+    </label>
+  </div>
+
+  <label>Tags
+    <input type="text" name="tags" value="{{ f.get('tags', '') }}"
+           placeholder="comma,separated,tags">
+  </label>
+
+  <label>Notes
+    <textarea name="notes" rows="3"
+              placeholder="Anything useful for review…">{{ f.get('notes', '') }}</textarea>
+  </label>
+
+  <label>Reference image
+    <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp">
+    <small>JPG / PNG / WEBP, up to 16 MB. Used as the face-recognition seed.</small>
+  </label>
+
+  <div class="form-actions">
+    <button class="btn" type="submit">Save POI</button>
+    <a class="btn btn-ghost" href="{{ url_for('index') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

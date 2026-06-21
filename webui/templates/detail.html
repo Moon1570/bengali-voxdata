@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ sp.name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <a class="back" href="{{ url_for('index') }}">← All POIs</a>
+  <h1>{{ sp.name }}</h1>
+</div>
+
+<div class="detail">
+  <div class="detail-image">
+    {% if sp.image_path %}
+      <img src="{{ url_for('uploaded_file', relpath=sp.image_path) }}" alt="{{ sp.name }}">
+    {% else %}
+      <div class="thumb-placeholder large">{{ sp.name[:1]|upper }}</div>
+    {% endif %}
+  </div>
+
+  <div class="detail-meta">
+    <table class="kv">
+      <tr><th>ID</th><td><code>{{ sp.speaker_id }}</code></td></tr>
+      <tr><th>Region</th><td>{{ sp.region or "—" }}</td></tr>
+      <tr><th>Profession</th><td>{{ sp.profession or "—" }}</td></tr>
+      <tr><th>Gender</th><td>{{ sp.gender or "—" }}</td></tr>
+      <tr><th>Wikidata</th><td>{{ sp.wikidata_id or "—" }}</td></tr>
+      <tr><th>Seed dir</th><td>{{ sp.seed_dir or "—" }}</td></tr>
+      <tr><th>Notes</th><td>{{ sp.notes or "—" }}</td></tr>
+      <tr><th>Created</th><td>{{ sp.created_at }}</td></tr>
+    </table>
+
+    <form class="inline-form" method="post"
+          action="{{ url_for('set_status', speaker_id=sp.speaker_id) }}">
+      <label>Label / status
+        <select name="status">
+          {% for s in statuses %}
+            <option value="{{ s }}" {% if s == sp.status %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button class="btn" type="submit">Update</button>
+    </form>
+  </div>
+</div>
+
+<section class="tags-section">
+  <h2>Tags</h2>
+  <div class="badges">
+    {% for tag in sp.tags %}
+      <span class="badge tag">{{ tag }}
+        <form class="tag-remove" method="post"
+              action="{{ url_for('remove_tag', speaker_id=sp.speaker_id) }}">
+          <input type="hidden" name="tag" value="{{ tag }}">
+          <button title="Remove tag" type="submit">×</button>
+        </form>
+      </span>
+    {% else %}
+      <span class="muted">No tags yet.</span>
+    {% endfor %}
+  </div>
+
+  <form class="inline-form" method="post"
+        action="{{ url_for('add_tags', speaker_id=sp.speaker_id) }}">
+    <input type="text" name="tags" placeholder="add tags, comma,separated" required>
+    <button class="btn" type="submit">Add tags</button>
+  </form>
+</section>
+{% endblock %}
