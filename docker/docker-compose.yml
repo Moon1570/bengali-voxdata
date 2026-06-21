@@ -1,0 +1,26 @@
+services:
+  pipeline:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: bengali-voxdata:latest
+    env_file: ../.env
+    working_dir: /app
+    volumes:
+      - ../data:/app/data
+      - ../config:/app/config
+      - ../manifest.db:/app/manifest.db
+      - ../pipeline/asr:/app/pipeline/asr           # drop the user's transcription script here
+      - hf-cache:/root/.cache/huggingface
+      - torch-cache:/root/.cache/torch
+    shm_size: "8gb"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+volumes:
+  hf-cache:
+  torch-cache:

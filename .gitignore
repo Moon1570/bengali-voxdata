@@ -1,0 +1,28 @@
+# Data tree (mounted as a volume, never committed) — keep the empty skeleton
+data/**
+!data/**/
+!data/**/.gitkeep
+manifest.db
+manifest.db-wal
+manifest.db-shm
+
+# Secrets
+.env
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Caches
+.cache/
+*.log
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

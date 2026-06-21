@@ -1,0 +1,22 @@
+torch
+torchaudio
+yt-dlp
+scenedetect[opencv]
+opencv-python-headless
+insightface
+onnxruntime-gpu
+pyannote.audio>=3.1
+transformers
+huggingface_hub
+pandas
+pyarrow
+pyyaml
+tqdm
+soundfile
+librosa
+numpy
+scikit-learn
+ffmpeg-python
+SPARQLWrapper
+# TalkNet-ASD: add as git submodule under third_party/
+# ASR: the user's transcription script and its deps drop into pipeline/asr/ (add to this file when supplied)

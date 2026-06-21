@@ -1,0 +1,51 @@
+paths:
+  data: /app/data
+  manifest: /app/manifest.db
+speakers:
+  seed_csv: /app/config/speakers_seed.csv
+  use_wikidata: true
+  min_speakers: 50
+  languages: [bn]
+collect:
+  per_speaker_videos: 5
+  min_duration_s: 60
+  max_duration_s: 1800
+  lang_filter: bn
+scenes:
+  detector: content
+  threshold: 27.0
+facetrack:
+  det_model: scrfd_10g_bnkps
+  det_threshold: 0.5
+facerec:
+  model: buffalo_l
+  cosine_threshold: 0.45   # raise if pilot precision < 95%
+asd:
+  backend: talknet
+  score_threshold: 0.0
+audio:
+  sr_asr: 16000
+  sr_tts: 24000
+  min_len_s: 1.0
+  max_len_s: 15.0
+asr:
+  mode: stub                    # stub | provider  (stub runs without the script)
+  language_code: bn-IN          # default; auto-switch by speaker region
+  region_language_map:
+    Bangladesh: bn-BD
+    India: bn-IN
+  max_retries: 5
+  requests_per_minute: 300      # client-side rate limit for the user's script
+sector:
+  model: xlm-roberta-large
+  labels: [actor, politician, news_anchor, athlete, creator, academic, other]
+dialect:
+  weak_label_from_region: true
+quality:
+  tts_min_snr_db: 20
+  tts_max_overlap_s: 0.0
+  asr_max_overlap_s: 0.5
+verify:
+  sample_size: 200
+release:
+  redistribute_media: false   # MUST stay false
