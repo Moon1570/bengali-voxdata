@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}All POIs{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Persons of Interest <span class="count">{{ speakers|length }}</span></h1>
+</div>
+
+{% if not speakers %}
+  <div class="empty">
+    <p>No POIs yet.</p>
+    <a class="btn" href="{{ url_for('new_poi') }}">+ Add the first POI</a>
+  </div>
+{% else %}
+  <div class="grid">
+    {% for sp in speakers %}
+      <a class="card" href="{{ url_for('detail', speaker_id=sp.speaker_id) }}">
+        <div class="thumb">
+          {% if sp.image_path %}
+            <img src="{{ url_for('uploaded_file', relpath=sp.image_path) }}" alt="{{ sp.name }}">
+          {% else %}
+            <div class="thumb-placeholder">{{ sp.name[:1]|upper }}</div>
+          {% endif %}
+        </div>
+        <div class="card-body">
+          <div class="card-title">{{ sp.name }}</div>
+          <div class="card-meta">
+            {{ sp.profession or "—" }}{% if sp.region %} · {{ sp.region }}{% endif %}
+          </div>
+          <div class="badges">
+            <span class="badge status-{{ sp.status }}">{{ sp.status }}</span>
+            {% for tag in sp.tags %}<span class="badge tag">{{ tag }}</span>{% endfor %}
+          </div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}
