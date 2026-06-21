@@ -24,17 +24,31 @@ from pipeline.utils.video import render_bbox_video  # noqa: E402
 logger = logging.getLogger("render_tracks")
 
 
-def load_tracks_for_video(mf: Manifest, video_id: str) -> dict[str, list[dict]]:
-    """Return ``track_id -> bbox sequence`` for one video from the manifest."""
+def load_tracks_for_video(mf: Manifest, video_id: str) -> tuple[dict, dict, set]:
+    """Return (tracks, labels, assigned) for one video from the manifest.
+
+    ``tracks`` maps track_id -> bbox sequence; ``labels`` maps assigned tracks
+    to a "speaker score" caption; ``assigned`` is the set of track ids s05
+    matched to the target speaker. All track rows are included (assigned or
+    not) so the QA video shows both kept and rejected faces.
+    """
     tracks: dict[str, list[dict]] = {}
+    labels: dict[str, str] = {}
+    assigned: set[str] = set()
     rows = mf.query(
-        "SELECT track_id, bbox_path FROM tracks WHERE video_id=? AND status='done'",
-        (video_id,))
+        "SELECT track_id, bbox_path, speaker_id, facerec_score FROM tracks "
+        "WHERE video_id=? AND bbox_path IS NOT NULL", (video_id,))
     for r in rows:
-        if r["bbox_path"] and os.path.exists(r["bbox_path"]):
-            with open(r["bbox_path"], encoding="utf-8") as fh:
-                tracks[r["track_id"]] = json.load(fh)
-    return tracks
+        if not (r["bbox_path"] and os.path.exists(r["bbox_path"])):
+            continue
+        with open(r["bbox_path"], encoding="utf-8") as fh:
+            tracks[r["track_id"]] = json.load(fh)
+        if r["speaker_id"]:
+            assigned.add(r["track_id"])
+            score = r["facerec_score"]
+            labels[r["track_id"]] = (f"{r['speaker_id']} {score:.2f}"
+                                     if score is not None else r["speaker_id"])
+    return tracks, labels, assigned
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -67,13 +81,15 @@ def main(argv: list[str] | None = None) -> int:
         if not row or not row[0]["local_path"] or not os.path.exists(row[0]["local_path"]):
             logger.error("%s: source video missing; skipping", vid)
             continue
-        tracks = load_tracks_for_video(mf, vid)
+        tracks, labels, assigned = load_tracks_for_video(mf, vid)
         if not tracks:
             logger.warning("%s: no track artifacts found; skipping", vid)
             continue
         out_path = os.path.join(viz_root, f"{vid}.bbox.mp4")
-        render_bbox_video(row[0]["local_path"], tracks, out_path)
-        logger.info("%s: rendered %d track(s) -> %s", vid, len(tracks), out_path)
+        render_bbox_video(row[0]["local_path"], tracks, out_path,
+                          labels=labels, assigned=assigned)
+        logger.info("%s: rendered %d track(s), %d assigned -> %s",
+                    vid, len(tracks), len(assigned), out_path)
 
     mf.close()
     return 0
