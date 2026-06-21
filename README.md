@@ -30,7 +30,16 @@ docker compose run --rm pipeline --stage s02 --limit 3
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+
+# Use the local config (repo-relative paths; config.yaml uses Docker /app paths)
+set -a; . ./.env; set +a                       # load HF_TOKEN / YT_API_KEY
+python -m pipeline.run --stage s01 --config config/config.local.yaml
+python -m pipeline.run --stage s02 --limit 3 --config config/config.local.yaml
 ```
+
+`config/config.local.yaml` writes the manifest to `./manifest.db` and media to
+`./data/` (both gitignored). Stages run in order — `s02` needs `s01`'s
+`done` speakers first.
 
 ## Config keys to edit first
 
