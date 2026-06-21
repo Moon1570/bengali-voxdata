@@ -9,6 +9,13 @@ manifest.db-shm
 # Secrets
 .env
 
+# POI web UI runtime artifacts
+webui/poi.db
+webui/poi.db-wal
+webui/poi.db-shm
+webui/uploads/*
+!webui/uploads/.gitkeep
+
 # Python
 .venv/
 venv/
