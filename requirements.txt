@@ -5,6 +5,7 @@ scenedetect[opencv]
 opencv-python-headless
 insightface
 onnxruntime-gpu
+supervision<0.30          # ByteTrack used by s04 (removed in supervision 0.30)
 pyannote.audio>=3.1
 transformers
 huggingface_hub
