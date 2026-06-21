@@ -57,13 +57,22 @@ def build_frame_index(tracks: dict[str, list[dict]], fps: float,
 
 
 def render_bbox_video(video_path: str, tracks: dict[str, list[dict]],
-                      out_path: str, max_hold_s: float = 0.5) -> str:
+                      out_path: str, max_hold_s: float = 0.5,
+                      labels: dict[str, str] | None = None,
+                      assigned: set[str] | None = None) -> str:
     """Render ``video_path`` with track bounding boxes drawn, to ``out_path``.
 
     ``tracks`` maps ``track_id -> [{"t": s, "bbox": [x1,y1,x2,y2]}, ...]``
-    (as written by s04). Returns ``out_path``.
+    (as written by s04). If ``assigned`` (a set of track ids, e.g. those s05
+    matched to the target speaker) is given, those boxes are drawn highlighted
+    in green and the rest dimmed; ``labels`` overrides the per-track caption.
+    Returns ``out_path``.
     """
     import cv2
+
+    labels = labels or {}
+    assigned = assigned or set()
+    green, gray = (46, 204, 113), (150, 150, 150)
 
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -76,6 +85,7 @@ def render_bbox_video(video_path: str, tracks: dict[str, list[dict]],
     writer = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"mp4v"),
                              fps, (width, height))
     index = build_frame_index(tracks, fps, max_hold_s)
+    highlight = bool(assigned)
 
     frame_idx = 0
     try:
@@ -85,9 +95,14 @@ def render_bbox_video(video_path: str, tracks: dict[str, list[dict]],
                 break
             for tid, bbox in index.get(frame_idx, ()):
                 x1, y1, x2, y2 = (int(round(v)) for v in bbox)
-                color = _color_for(tid)
-                cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-                label = tid.split("_")[-1]  # short track tag, e.g. t003
+                if highlight:
+                    is_target = tid in assigned
+                    color = green if is_target else gray
+                    thickness = 3 if is_target else 1
+                else:
+                    color, thickness = _color_for(tid), 2
+                cv2.rectangle(frame, (x1, y1), (x2, y2), color, thickness)
+                label = labels.get(tid, tid.split("_")[-1])
                 cv2.putText(frame, label, (x1, max(0, y1 - 6)),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2, cv2.LINE_AA)
             writer.write(frame)
