@@ -3,6 +3,7 @@ paths:
   manifest: /app/manifest.db
 speakers:
   seed_csv: /app/config/speakers_seed.csv
+  webui_db: /app/webui/poi.db   # POIs seeded by the researcher web UI (stage s01 input)
   use_wikidata: true
   min_speakers: 50
   languages: [bn]
